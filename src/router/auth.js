@@ -1,5 +1,6 @@
 const route = require('express').Router();
 const UserModel = require('../models/User');
+const jwt = require('jsonwebtoken');
 
 route.post('/signup', async (req, res, next) => {
   const { username, email, password } = req.body;
@@ -27,17 +28,27 @@ route.get('/login', async (req, res, next) => {
 
   try {
     const user = await UserModel.findOne({ email });
+    console.log(user);
     const compare = await user.comparePassword(password);
+    console.log(compare);
     if (compare) {
-      res.status(200).json({
+      const token = jwt.sign({ userId: user._id }, user.secret_key, {
+        expiresIn: '24h',
+      });
+      const userLogin = {
+        token,
+        email: user.email,
+      };
+
+      return res
+        .status(200)
+        .json({ success: true, message: 'Auth Successful', userLogin });
+    } else {
+      res.status(401).json({
         success: true,
-        message: 'Login Created Successfully',
+        message: 'Password is Incorrect !',
       });
     }
-    res.status(401).json({
-      success: true,
-      message: 'Password is Incorrect !',
-    });
   } catch (error) {
     const errorMessage = 'Error to login user';
     console.error(`${errorMessage}: `, error.message);

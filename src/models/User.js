@@ -1,5 +1,6 @@
 const { model, Schema } = require('mongoose');
 const bcrypt = require('bcrypt');
+const keygen = require('keygenerator');
 
 const userSchema = new Schema({
   username: { type: String, required: true },
@@ -9,11 +10,12 @@ const userSchema = new Schema({
     required: true,
   },
   password: { type: String, required: true },
+  secret_key: String,
 });
 
 userSchema.pre('save', function (next) {
   var user = this;
-
+  user.secret_key = keygen._();
   // only hash the password if it has been modified (or is new)
   if (!user.isModified('password')) return next();
 
@@ -26,6 +28,7 @@ userSchema.pre('save', function (next) {
       if (err) return next(err);
       // override the cleartext password with the hashed one
       user.password = hash;
+
       next();
     });
   });
@@ -34,5 +37,6 @@ userSchema.pre('save', function (next) {
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
 
 module.exports = model('User', userSchema);
