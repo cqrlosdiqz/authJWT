@@ -14,17 +14,17 @@ const userSchema = new Schema({
 });
 
 userSchema.pre('save', function (next) {
-  var user = this;
+  let user = this;
   user.secret_key = keygen._();
   // only hash the password if it has been modified (or is new)
   if (!user.isModified('password')) return next();
 
   // generate a salt
-  bcrypt.genSalt(parseInt(process.env.BCRYPT_SALT), function (err, salt) {
+  bcrypt.genSalt(parseInt(process.env.BCRYPT_SALT), (err, salt) => {
     if (err) return next(err);
 
     // hash the password using our new salt
-    bcrypt.hash(user.password, salt, function (err, hash) {
+    bcrypt.hash(user.password, salt, (err, hash) => {
       if (err) return next(err);
       // override the cleartext password with the hashed one
       user.password = hash;
@@ -37,6 +37,5 @@ userSchema.pre('save', function (next) {
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
-
 
 module.exports = model('User', userSchema);
