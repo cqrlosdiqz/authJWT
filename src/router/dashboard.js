@@ -1,11 +1,21 @@
 const route = require('express').Router();
 const authenticateJWT = require('../utils/authenticateJWT');
+const UserModel = require('../models/User');
 
 route.get('/', authenticateJWT, async (req, res, next) => {
-  // const { username, email, password } = req.body;
+  const { userId } = req.user;
 
   try {
-    res.send({hola:req.user})
+    const user = await UserModel.findById(
+      { _id: userId },
+      { password: 0, secret_key: 0, __v: 0 }
+    );
+
+    res.send(
+      `<h1>Dashboard</h1><h2>User Logged: ${user.username}</h2><p>Email: ${user.email}</p>`
+    );
+
+    
   } catch (error) {
     const errorMessage = 'Error to create user';
     console.error(`${errorMessage}: `, error.message);
