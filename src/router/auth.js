@@ -28,9 +28,7 @@ route.get('/login', async (req, res, next) => {
 
   try {
     const user = await UserModel.findOne({ email });
-    console.log(user);
     const compare = await user.comparePassword(password);
-    console.log(compare);
     if (compare) {
       const token = jwt.sign({ userId: user._id }, user.secret_key, {
         expiresIn: '24h',
