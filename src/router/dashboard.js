@@ -17,7 +17,7 @@ route.get('/', authenticateJWT, async (req, res, next) => {
 
     
   } catch (error) {
-    const errorMessage = 'Error to create user';
+    const errorMessage = 'User does not exist';
     console.error(`${errorMessage}: `, error.message);
     next(new Error(errorMessage));
   }
